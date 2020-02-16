@@ -9,7 +9,7 @@ test_eval_str("10 20 * .", "200");
 test_eval_str("200 20 / .", "10");
 test_eval_str("10 30 + 30 20 - * 40 / .", "10");
 test_eval_str("10 20 30 + 5 + * .", "550");
-
+test_eval_str("65 66 emit", "B");
 
 function eval_str($str) {
     $tokens = explode(' ', $str);
@@ -18,7 +18,10 @@ function eval_str($str) {
     foreach ($tokens as $key => $token) {
         // echo "[debug]({$key}) : token='{$token}' stack=" . print_r($stack, true) . PHP_EOL;
     
-        if ($token == '.') {
+        if ($token == 'emit') {
+            $x = array_pop($stack);
+            echo chr($x);
+        } else if ($token == '.') {
             $x = array_pop($stack);
             echo $x;
         } else if ($token == '+') {
