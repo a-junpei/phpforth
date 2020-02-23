@@ -14,40 +14,50 @@ test_eval_str("65 66 emit", "B");
 function eval_str($str) {
     $tokens = explode(' ', $str);
 
-    $stack = array();
-    foreach ($tokens as $key => $token) {
-        // echo "[debug]({$key}) : token='{$token}' stack=" . print_r($stack, true) . PHP_EOL;
-    
-        if ($token == 'emit') {
-            $x = array_pop($stack);
-            echo chr($x);
-        } else if ($token == '.') {
+    $stack = [];
+    $words = [
+        '.' => function() use (&$stack) {
             $x = array_pop($stack);
             echo $x;
-        } else if ($token == '+') {
+        },
+        '+' => function() use (&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x + $y;
             array_push($stack, $result);
-        } else if ($token == '-') {
+        },
+        '-' => function() use (&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x - $y;
             array_push($stack, $result);
-        } else if ($token == '*') {
+        }, 
+        '*' => function() use (&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x * $y;
             array_push($stack, $result);
-        } else if ($token == '/') {
+        }, 
+        '/' => function() use (&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x / $y;
             array_push($stack, $result);
+        }, 
+        'emit' => function() use (&$stack) {
+            $x = array_pop($stack);
+            echo chr($x);
+        }, 
+    ];
+    foreach ($tokens as $key => $token) {
+        // echo "[debug]({$key}) : token='{$token}' stack=" . print_r($stack, true) . PHP_EOL;
+    
+        if (isset($words[$token])) {
+            $words[$token]();
         } else if (is_numeric($token)) {
             array_push($stack, $token);
         } else {
