@@ -36,6 +36,11 @@ RUN apt-get update \
     && apt-get install -y sudo \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
     && chmod 0440 /etc/sudoers.d/$USERNAME \
+
+    && apt-get install -y zlib1g-dev \
+    && apt-get install -y libzip-dev \
+    && docker-php-ext-install zip \
+
     #
     # Clean up
     && apt-get autoremove -y \
@@ -45,4 +50,4 @@ RUN apt-get update \
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
 
-
+COPY --from=composer /usr/bin/composer /usr/bin/composer
