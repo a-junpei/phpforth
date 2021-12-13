@@ -1,15 +1,13 @@
 <?php
 
-function eval_str($str) {
-    $tokens = explode(' ', $str);
-
-    $stack = [];
-    $words = [
-        '.' => function() use (&$stack) {
+$env = [
+    'stack' => [],
+    'words' => [
+        '.' => function(&$stack) {
             $x = array_pop($stack);
             echo $x;
         },
-        '.s' => function() use (&$stack) {
+        '.s' => function(&$stack) {
             if (is_array($stack)) {
                 echo '<' . count($stack) . '>';
                 foreach ($stack as $value) {
@@ -17,89 +15,104 @@ function eval_str($str) {
                 }
             }
         },
-        '+' => function() use (&$stack) {
+        '+' => function(&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x + $y;
             array_push($stack, $result);
         },
-        '-' => function() use (&$stack) {
+        '-' => function(&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x - $y;
             array_push($stack, $result);
         }, 
-        '*' => function() use (&$stack) {
+        '*' => function(&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x * $y;
             array_push($stack, $result);
         }, 
-        '/' => function() use (&$stack) {
+        '/' => function(&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
     
             $result = $x / $y;
             array_push($stack, $result);
         }, 
-        'dup' => function() use (&$stack) {
+        'dup' => function(&$stack) {
             $x = array_pop($stack);
             array_push($stack, $x);
             array_push($stack, $x);
         }, 
-        'emit' => function() use (&$stack) {
+        'emit' => function(&$stack) {
             $x = array_pop($stack);
             echo chr($x);
         }, 
-        'swap' => function() use (&$stack) {
+        'swap' => function(&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
             array_push($stack, $y);
             array_push($stack, $x);
         }, 
-        'over' => function() use (&$stack) {
+        'over' => function(&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);
             array_push($stack, $x);
             array_push($stack, $y);
             array_push($stack, $x);
         }, 
-    ];
+    ],
+    'definition_mode' => false,
+    'definition_stack' => [],    
+];
 
-    $definition_mode = false;
-    $definition_stack = [];
-    
+function repl(&$env) {
+    while(1) {
+        echo 'phpforth> ';
+        eval_str($env, str_replace("\r\n", '', fgets(STDIN)));
+        echo PHP_EOL;
+    }
+}
+
+function eval_str(&$env, $str) {
+    $tokens = explode(' ', $str);
+
     foreach ($tokens as $key => $token) {
-        // echo "[debug]({$key}) : token='{$token}' stack=" . print_r($stack, true) . PHP_EOL;
+        // echo "[debug]({$key}) : token='{$token}' stack=" . print_r($env['stack'], true) . PHP_EOL;
 
-        if ($definition_mode) {
+        if ($env['definition_mode']) {
             if ($token === ';') {
-                $name = array_shift($definition_stack);
-                $definitions = $definition_stack;
-                $words[$name] = function() use (&$stack, $words, $definitions) {
+                $name = array_shift($env['definition_stack']);
+                $definitions = $env['definition_stack'];
+                $env['words'][$name] = function() use (&$env, $definitions) {
                     foreach($definitions as $definition) {
-                        $words[$definition]();
+                        $env['words'][$definition]($env['stack']);
                     }
                 };
 
-                $definition_mode = false;
-                $definition_stack = [];
+                $env['definition_mode'] = false;
+                $env['definition_stack'] = [];
             } else {
-                array_push($definition_stack, $token);
+                array_push($env['definition_stack'], $token);
             }
         } else {
             if ($token === ':') {
-                $definition_mode = true;
-            } else if (isset($words[$token])) {
-                $words[$token]();
+                $env['definition_mode'] = true;
+            } else if (isset($env['words'][$token])) {
+                $env['words'][$token]($env['stack']);
             } else if (is_numeric($token)) {
-                array_push($stack, $token);
+                array_push($env['stack'], $token);
             } else {
                 ;
             }
         }
     }
+}
+
+if (!defined('TEST_MODE')) {
+    repl($env);
 }

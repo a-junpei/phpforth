@@ -1,10 +1,14 @@
 <?php
 
+define('TEST_MODE', 1);
 require 'app/forth.php';
 
 function test_eval_str($input, $expected) {
+    global $env;
+    $_env = $env; // 環境引き継がないようにする
+
     ob_start();
-    eval_str($input);
+    eval_str($_env, $input);
     $actual = ob_get_clean();
     assertEquals($expected, $actual);
 }
