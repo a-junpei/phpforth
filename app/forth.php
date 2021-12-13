@@ -9,6 +9,14 @@ function eval_str($str) {
             $x = array_pop($stack);
             echo $x;
         },
+        '.s' => function() use (&$stack) {
+            if (is_array($stack)) {
+                echo '<' . count($stack) . '>';
+                foreach ($stack as $value) {
+                    echo ' ' . $value;
+                }
+            }
+        },
         '+' => function() use (&$stack) {
             $y = array_pop($stack);
             $x = array_pop($stack);

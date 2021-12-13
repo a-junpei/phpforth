@@ -43,11 +43,11 @@ test(':', function() {
 });
 
 test('swap', function() {
-    test_eval_str("3 4 swap . .", "34");
+    test_eval_str("3 4 swap .s", "<2> 4 3");
 });
 
 test('over', function() {
-    test_eval_str("3 4 over . . .", "343");
+    test_eval_str("3 4 over .s", "<3> 3 4 3");
 });
 
 test('fib', function() {
