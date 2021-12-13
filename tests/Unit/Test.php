@@ -41,3 +41,16 @@ test('dup', function() {
 test(':', function() {
     test_eval_str(": cube dup dup * * ; 4 cube .", "64");
 });
+
+test('swap', function() {
+    test_eval_str("3 4 swap . .", "34");
+});
+
+test('over', function() {
+    test_eval_str("3 4 over . . .", "343");
+});
+
+test('fib', function() {
+    // https://qiita.com/iigura/items/2a34303d73dd4e7b0184
+    test_eval_str("1 1 swap over + dup . swap over + dup . swap over + dup . swap over + dup .", "2358");
+});

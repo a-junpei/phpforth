@@ -46,6 +46,19 @@ function eval_str($str) {
             $x = array_pop($stack);
             echo chr($x);
         }, 
+        'swap' => function() use (&$stack) {
+            $y = array_pop($stack);
+            $x = array_pop($stack);
+            array_push($stack, $y);
+            array_push($stack, $x);
+        }, 
+        'over' => function() use (&$stack) {
+            $y = array_pop($stack);
+            $x = array_pop($stack);
+            array_push($stack, $x);
+            array_push($stack, $y);
+            array_push($stack, $x);
+        }, 
     ];
 
     $definition_mode = false;
